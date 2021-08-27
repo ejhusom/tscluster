@@ -36,9 +36,6 @@ def clean(dir_path):
     dataset = yaml.safe_load(open("params.yaml"))["profile"]["dataset"]
     params = yaml.safe_load(open("params.yaml"))
     combine_files = params["clean"]["combine_files"]
-    target = params["clean"]["target"]
-    classification = params["clean"]["classification"]
-    onehot_encode_target = params["clean"]["onehot_encode_target"]
 
     # If no name of data set is given, all files present in 'assets/data/raw'
     # will be used.
@@ -72,30 +69,6 @@ def clean(dir_path):
 
     combined_df = pd.concat(dfs, ignore_index=True)
 
-    if classification:
-
-        if onehot_encode_target and len(np.unique(combined_df[target])) > 2:
-            encoder = LabelBinarizer()
-        else:
-            if onehot_encode_target:
-                raise ValueError(
-                    "Parameter 'onehot_encode_target' is set to True, but target is binary. Change parameter to False in order to use this pipeline."
-                )
-            encoder = LabelEncoder()
-
-        target_col = np.array(combined_df[target]).reshape(-1)
-        encoder.fit(target_col)
-        print(f"Classes: {encoder.classes_}")
-        print(f"Encoded classes: {encoder.transform(encoder.classes_)}")
-
-        combined_df, output_columns = encode_target(encoder, combined_df, target)
-
-        for i in range(len(dfs)):
-            dfs[i], _ = encode_target(encoder, dfs[i], target)
-
-    else:
-        output_columns = [target]
-
     if combine_files:
         combined_df.to_csv(
             DATA_CLEANED_PATH / (os.path.basename("data-cleaned.csv"))
@@ -107,42 +80,6 @@ def clean(dir_path):
                 / (os.path.basename(filepath).replace(".", "-cleaned."))
             )
 
-    pd.DataFrame(output_columns).to_csv(DATA_PATH / "output_columns.csv")
-
-
-def encode_target(encoder, df, target):
-    """Encode a target variable based on a fitted encoder.
-
-    Args:
-        encoder: A fitted encoder.
-        df (DataFrame): DataFrame containing the target variable.
-        target (str): Name of the target variable.
-
-    Returns:
-        df (DataFrame): DataFrame with the original target variable removed,
-            substituted by a onehot encoding of the variable.
-        output_columns (list): List of the names of the target columns.
-
-    """
-
-    output_columns = []
-
-    target_col = np.array(df[target]).reshape(-1)
-    target_encoded = encoder.transform(target_col)
-
-    del df[target]
-
-    if len(target_encoded.shape) > 1:
-        for i in range(target_encoded.shape[-1]):
-            column_name = f"{target}_{i}"
-            df[column_name] = target_encoded[:, i]
-            output_columns.append(column_name)
-    else:
-        df[target] = target_encoded
-        output_columns.append(target)
-
-    return df, output_columns
-
 
 def parse_profile_warnings():
     """Read profile warnings and find which columns to delete.
@@ -153,7 +90,6 @@ def parse_profile_warnings():
     """
     params = yaml.safe_load(open("params.yaml"))["clean"]
     correlation_metric = params["correlation_metric"]
-    target = params["target"]
 
     profile_json = json.load(open(PROFILE_PATH / "profile.json"))
     messages = profile_json["messages"]
@@ -188,8 +124,6 @@ def parse_profile_warnings():
                         correlation_scores[correlated_variable]
                         > input_max_correlation_threshold
                         and variable != correlated_variable
-                        and variable != target
-                        and correlated_variable != target
                         and variable not in removable_variables
                     ):
 
@@ -205,10 +139,6 @@ def parse_profile_warnings():
                 # print(f"{variable}: Could not find correlation score.")
 
     removable_variables = list(set(removable_variables))
-
-    if target in removable_variables:
-        print("Warning related to target variable. Check profile for details.")
-        removable_variables.remove(target)
 
     return removable_variables
 

@@ -40,15 +40,10 @@ def featurize(dir_path):
     remove_features = params["featurize"]["remove_features"]
     add_rolling_features = params["featurize"]["add_rolling_features"]
     rolling_window_size = params["featurize"]["rolling_window_size"]
-    target = params["clean"]["target"]
 
     filepaths = find_files(dir_path, file_extension=".csv")
 
     DATA_FEATURIZED_PATH.mkdir(parents=True, exist_ok=True)
-
-    output_columns = np.array(
-        pd.read_csv(DATA_PATH / "output_columns.csv", index_col=0, dtype=str)
-    ).reshape(-1)
 
     # ===============================================
     # TODO: Automatic encoding of categorical input variables
@@ -68,11 +63,11 @@ def featurize(dir_path):
 
     categorical_variables = find_categorical_variables()
 
-    # Remove target and variables that was removed in the cleaning process
+    # Remove variables that was removed in the cleaning process
     categorical_variables = [
         var
         for var in categorical_variables
-        if var in combined_df.columns and var != target
+        if var in combined_df.columns
     ]
 
     print(combined_df)
@@ -97,10 +92,6 @@ def featurize(dir_path):
 
         # Read csv
         df = pd.read_csv(filepath, index_col=0)
-
-        # Move target column(s) to the beginning of dataframe
-        for col in output_columns[::-1]:
-            df = move_column(df, column_name=col, new_idx=0)
 
         # If no features are specified, use all columns as features
         if not isinstance(features, list):
@@ -143,7 +134,7 @@ def featurize(dir_path):
         )
 
     # Save list of features used
-    input_columns = [col for col in df.columns if col not in output_columns]
+    input_columns = [col for col in df.columns]
     pd.DataFrame(input_columns).to_csv(DATA_PATH / "input_columns.csv")
 
 
@@ -248,63 +239,6 @@ def calculate_slope(series, shift=2, rolling_mean_window=1, absvalue=False):
     return slope
 
 
-# def filter_inputs_by_correlation():
-#     """Filter the input features based on the correlation between the features
-#     and the target variable.
-
-#     Returns:
-#         removable_variables (list): Which columns to delete from data set.
-
-#     """
-
-#     params_clean = yaml.safe_load(open("params.yaml"))["clean"]
-#     correlation_metric = params_clean["correlation_metric"]
-#     target = params_clean["target"]
-
-#     params_featurize = yaml.safe_load(open("params.yaml"))["featurize"]
-#     target_min_correlation_threshold = params["target_min_correlation_threshold"]
-
-#     profile_json = json.load(open(PROFILE_PATH / "profile.json"))
-#     messages = profile_json["messages"]
-#     variables = list(profile_json["variables"].keys())
-#     correlations = profile_json["correlations"]["pearson"]
-
-#     removable_variables = []
-
-
-#     for m in messages:
-#         m = m.split()
-#         warning = m[0]
-#         variable = m[-1]
-
-#         if warning == "[CONSTANT]":
-#             removable_variables.append(variable)
-#         if warning == "[ZEROS]":
-#             p_zeros = profile_json["variables"][variable]["p_zeros"]
-#             if p_zeros > percentage_zeros_threshold:
-#                 removable_variables.append(variable)
-#         if warning == "[HIGH_CORRELATION]":
-#             try:
-#                 correlation_scores = correlations[variables.index(variable)]
-#                 for correlated_variable in correlation_scores:
-#                     if (correlation_scores[correlated_variable] > input_max_correlation_threshold and
-#                         variable != correlated_variable and
-#                         variable not in removable_variables):
-
-#                         removable_variables.append(correlated_variable)
-#                         # print(f"{variable} is correlated with {correlated_variable}: {correlation_scores[correlated_variable]}")
-#             except:
-#                 # Pandas profiling might not be able to compute correlation
-#                 # score for some variables, for example some categorical
-#                 # variables.
-#                 pass
-#                 # print(f"{variable}: Could not find correlation score.")
-
-#     removable_variables = list(set(removable_variables))
-
-#     return removable_variables
-
-
 def find_categorical_variables():
     """Find categorical variables based on profiling report.
 
@@ -314,7 +248,6 @@ def find_categorical_variables():
     """
 
     params = yaml.safe_load(open("params.yaml"))["clean"]
-    target = params["target"]
 
     profile_json = json.load(open(PROFILE_PATH / "profile.json"))
     variables = list(profile_json["variables"].keys())

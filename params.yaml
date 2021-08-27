@@ -1,12 +1,7 @@
 profile:
-    # dataset: cnc_toolwear
     dataset: automotive
 
 clean:
-    # target: X1_ActualPosition
-    target: Axis_X_Real_Position
-    classification: False
-    onehot_encode_target: False
     combine_files: True
     percentage_zeros_threshold: 1.0
     correlation_metric: pearson
@@ -14,42 +9,27 @@ clean:
 
 featurize:
     features:
-        # - feature1
-        # - feature2
     add_rolling_features: False
     rolling_window_size: 100
     remove_features:
-        # - feature1
-        # - feature2
         # - Axis_Y_Position_Diff
         # - Axis_Z_Position_Diff
         # - Axis_B_Position_Diff
         # - Abs_Sum_Position_Diff
 
-    target_min_correlation_threshold: 0.0
-
 split:
     train_split: 0.7
     shuffle_files: False
-    calibrate_split: 0.0
 
 scale:
     input: minmax
-    output: minmax
 
 sequentialize:
-    window_size: 40
+    window_size: 50
     overlap: 0
-    target_size: 10
     shuffle_samples: False
-    future_predict: False
 
 train:
-    learning_method: cnn
-    n_epochs: 50
-    batch_size: 256
-    kernel_size: 5
-    early_stopping: True
-    patience: 40
+    learning_method: kmeans
 
 evaluate:

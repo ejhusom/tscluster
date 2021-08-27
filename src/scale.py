@@ -39,11 +39,6 @@ def scale(dir_path):
 
     params = yaml.safe_load(open("params.yaml"))["scale"]
     input_method = params["input"]
-    output_method = params["output"]
-    classification = yaml.safe_load(open("params.yaml"))["clean"]["classification"]
-    onehot_encode_target = yaml.safe_load(open("params.yaml"))["clean"][
-        "onehot_encode_target"
-    ]
 
     if input_method == "standard":
         scaler = StandardScaler()
@@ -56,64 +51,19 @@ def scale(dir_path):
     else:
         raise NotImplementedError(f"{input_method} not implemented.")
 
-    if output_method == "standard":
-        output_scaler = StandardScaler()
-    elif output_method == "minmax":
-        output_scaler = MinMaxScaler()
-    elif output_method == "robust":
-        output_scaler = RobustScaler()
-    elif output_method is None:
-        output_scaler = StandardScaler()
-    else:
-        raise NotImplementedError(f"{output_method} not implemented.")
-
-    train_inputs = []
-    train_outputs = []
-
     data_overview = {}
-
-    output_columns = np.array(
-        pd.read_csv(DATA_PATH / "output_columns.csv", index_col=0)
-    ).reshape(-1)
-
-    n_output_cols = len(output_columns)
+    data_matrices = []
 
     for filepath in filepaths:
 
-        data = np.load(filepath)
+        X = np.load(filepath)
+        data_overview[filepath] = {"X": X}
+        data_matrices.append(X)
 
-        # Split into input (X) and output/target (y)
-        X = data[:, n_output_cols:].copy()
-        y = data[:, 0:n_output_cols].copy()
-
-        # If we have a one-hot encoding of categorical labels, shape of y stays
-        # the same, otherwise it is reshaped.
-        # TODO: Make a better test
-        # if classification and len(np.unique(y, axis=-1)) > 2:
-        #     pass
-        # else:
-        if not onehot_encode_target:
-            y = y.reshape(-1, 1)
-
-        if "train" in filepath:
-            train_inputs.append(X)
-            train_outputs.append(y)
-            category = "train"
-        elif "test" in filepath:
-            category = "test"
-        elif "calibrate" in filepath:
-            category = "calibrate"
-
-        data_overview[filepath] = {"X": X, "y": y, "category": category}
-
-    X_train = np.concatenate(train_inputs)
-    y_train = np.concatenate(train_outputs)
+    X = np.concatenate(data_matrices)
 
     # Fit a scaler to the training data
-    scaler = scaler.fit(X_train)
-
-    if not classification:
-        output_scaler = output_scaler.fit(y_train)
+    scaler = scaler.fit(X)
 
     for filepath in data_overview:
 
@@ -123,23 +73,16 @@ def scale(dir_path):
         else:
             X = scaler.transform(data_overview[filepath]["X"])
 
-        # Scale outputs
-        if output_method == None or classification:
-            y = data_overview[filepath]["y"]
-        else:
-            y = output_scaler.transform(data_overview[filepath]["y"])
-
         # Save X and y into a binary file
-        np.savez(
+        np.save(
             DATA_SCALED_PATH
             / (
                 os.path.basename(filepath).replace(
-                    data_overview[filepath]["category"] + ".npy",
-                    data_overview[filepath]["category"] + "-scaled.npz",
+                    ".npy",
+                    "-scaled.npy",
                 )
             ),
-            X=X,
-            y=y,
+            X,
         )
 
 

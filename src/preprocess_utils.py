@@ -192,6 +192,52 @@ def split_sequences(sequences, window_size, target_size=1, n_target_columns=1,
     return X, y
 
 
+def split_cluster_sequences(sequences, window_size, overlap=0):
+    """Split data sequence into subsequences.
+
+    Args:
+        sequences (array): The matrix containing the sequences, with the
+            targets in the first columns.
+        window_size (int): Number of time steps to include in each sample, i.e.
+            how much history should be matched with a given target.
+        overlap (int): How many time steps to overlap for each sequence. If
+            overlap is greater than window_size, it will be set to
+            window_size-1, which is the largest overlap possible.  Default=0,
+            which means there will be no overlap. 
+
+    Returns:
+        X (array): The subsequences.
+
+    """
+    X = list()
+
+    start_idx = 0
+
+    if overlap >= window_size:
+        overlap = window_size - 1
+
+    # for i in range(len(sequences)):
+    while start_idx + window_size <= len(sequences):
+
+        # find the end of this pattern
+        end_ix = start_idx + window_size
+
+        # check if we are beyond the dataset
+        if end_ix > len(sequences):
+            break
+
+        # Select all cols from sequences except target col, which leaves inputs
+        seq_x = sequences[start_idx:end_ix, :]
+
+        X.append(seq_x)
+
+        start_idx += window_size - overlap
+
+    X = np.array(X)
+
+    return X
+
+
 def flatten_sequentialized(X):
     """Flatten sequentialized data.
 

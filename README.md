@@ -1,9 +1,7 @@
-# Erdre
-
-Erroneous data repair for Industry 4.0.
+# tscluster
 
 This is a project using [DVC](https://dvc.org/) for setting up a flexible and
-robust pipeline for machine learning experiments.
+robust pipeline for clustering subsequences of a time series.
 
 This README explains how to use the pipeline to create predictive models from
 scratch:
