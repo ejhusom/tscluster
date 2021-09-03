@@ -19,7 +19,7 @@ import xgboost as xgb
 import yaml
 from joblib import dump
 from sklearn import cluster
-from tslearn.clustering import TimeSeriesKMeans
+from tslearn.clustering import KernelKMeans, TimeSeriesKMeans
 
 from config import (
     DATA_PATH,
@@ -44,35 +44,27 @@ def train(filepath):
     # Load parameters
     params = yaml.safe_load(open("params.yaml"))["train"]
     learning_method = params["learning_method"]
+    n_clusters = params["n_clusters"]
 
     # Load training set
-    train_data = np.load(filepath)
+    data = np.load(filepath)
 
-    X = train_data["X"]
+    X = data["X"]
 
     n_features = X.shape[-1]
     hist_size = X.shape[-2]
 
     # Build model
-    if learning_method == "kmeans":
+    if learning_method == "timeserieskmeans":
         # model = cluster.KMeans(n_clusters=2, random_state=0, n_init=50, max_iter=500)
-        model = TimeSeriesKMeans(n_clusters=3, metric="dtw")
+        model = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw")
+    elif learning_method == "kernelkmeans":
+        model = KernelKMeans(n_clusters=n_clusters)
     else:
         raise NotImplementedError(f"Learning method {learning_method} not implemented.")
 
     model.fit(X)
     dump(model, MODELS_FILE_PATH)
-
-    plt.figure()
-    plt.plot(model.labels_)
-    plt.show()
-    # print(model.cluster_centers_)
-
-    # for c in model.cluster_centers_:
-    #     plt.figure()
-    #     plt.plot(c)
-    #     plt.show()
-
 
 
 if __name__ == "__main__":

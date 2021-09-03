@@ -25,11 +25,12 @@ scale:
     input: minmax
 
 sequentialize:
-    window_size: 50
+    window_size: 4400
     overlap: 0
     shuffle_samples: False
 
 train:
-    learning_method: kmeans
+    learning_method: timeserieskmeans
+    n_clusters: 3
 
-evaluate:
+visualize:

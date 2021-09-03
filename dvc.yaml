@@ -100,15 +100,12 @@ stages:
         - assets/models
         params:
         - train.learning_method
+        - train.n_clusters
 
-    # evaluate:
-    #     cmd: python3 src/evaluate.py assets/models/model.h5 assets/data/combined/train.npz assets/data/combined/test.npz assets/data/combined/calibrate.npz
-    #     deps:
-    #     - assets/data/combined/test.npz
-    #     - assets/models/model.h5
-    #     - src/evaluate.py
-    #     - src/config.py
-    #     params:
-    #     metrics:
-    #     - assets/metrics/metrics.json
-
+    visualize:
+        cmd: python3 src/visualize.py assets/models/model.h5 assets/data/combined/X.npz 
+        deps:
+        - assets/data/combined
+        - assets/models/model.h5
+        - src/visualize.py
+        - src/config.py

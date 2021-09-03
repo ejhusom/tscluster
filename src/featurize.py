@@ -115,7 +115,7 @@ def featurize(dir_path):
 
         if add_rolling_features:
             df = compute_rolling_features(
-                df, rolling_window_size, ignore_columns=output_columns
+                df, rolling_window_size, ignore_columns=[]
             )
 
         if type(remove_features) is list:
