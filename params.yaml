@@ -1,17 +1,36 @@
 profile:
-    dataset: automotive
+    dataset: split_by_pn
+    # dataset: half_size
 
 clean:
-    combine_files: True
+    combine_files: False
     percentage_zeros_threshold: 1.0
     correlation_metric: pearson
     input_max_correlation_threshold: 1.0
 
 featurize:
     features:
-    add_rolling_features: False
-    rolling_window_size: 100
+        # TN
+        - TN
+        # - PN
+        # - Axis_X_Real_Position
+        # - Axis_X_Target_Position
+        # - Axis_Y_Real_Position
+        # - Axis_Y_Target_Position
+        # - Axis_Z_Real_Position
+        # - Axis_Z_Target_Position
+    add_rolling_features: True
+    rolling_window_size: 4400
     remove_features:
+        - TN
+        # - PN
+        # - Axis_X_Real_Position
+        # - Axis_X_Target_Position
+        # - Axis_Y_Real_Position
+        # - Axis_Y_Target_Position
+        # - Axis_Z_Real_Position
+        # - Axis_Z_Target_Position
+        # - TN
         # - Axis_Y_Position_Diff
         # - Axis_Z_Position_Diff
         # - Axis_B_Position_Diff
@@ -22,15 +41,16 @@ split:
     shuffle_files: False
 
 scale:
-    input: minmax
+    input:
 
 sequentialize:
-    window_size: 4400
+    window_size: 1
     overlap: 0
     shuffle_samples: False
 
 train:
-    learning_method: timeserieskmeans
-    n_clusters: 3
+    learning_method: kmeans
+    # learning_method: timeserieskmeans
+    n_clusters: 2
 
 visualize:

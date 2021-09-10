@@ -47,7 +47,10 @@ def sequentialize(dir_path):
         X = np.load(filepath)
 
         # Split into sequences
-        X = split_cluster_sequences(X, window_size, overlap=overlap)
+        if window_size == 1:
+            pass
+        else:
+            X = split_cluster_sequences(X, window_size, overlap=overlap)
 
         if params["shuffle_samples"]:
             permutation = np.random.permutation(X.shape[0])

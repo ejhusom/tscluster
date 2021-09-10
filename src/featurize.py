@@ -106,11 +106,13 @@ def featurize(dir_path):
             # Remove feature from input. This is useful in the case that a raw
             # feature is used to engineer a feature, but the raw feature itself
             # should not be a part of the input.
-            if (col not in features) and (col not in output_columns):
+            if col not in features:
+                print(f"Deleting column '{col}'")
                 del df[col]
 
             # Remove feature if it is non-numeric
             elif not is_numeric_dtype(df[col]):
+                print(f"Deleting column '{col}'")
                 del df[col]
 
         if add_rolling_features:
@@ -118,9 +120,9 @@ def featurize(dir_path):
                 df, rolling_window_size, ignore_columns=[]
             )
 
-        if type(remove_features) is list:
-            for col in remove_features:
-                del df[col]
+        # if type(remove_features) is list:
+        #     for col in remove_features:
+        #         del df[col]
 
         # # Save data
         # df.to_csv(

@@ -11,6 +11,7 @@ from joblib import load
 
 from config import (
     DATA_PATH,
+    DATA_PATH_RAW,
     INTERVALS_PLOT_PATH,
     METRICS_FILE_PATH,
     NON_DL_METHODS,
@@ -18,6 +19,7 @@ from config import (
     PREDICTION_PLOT_PATH,
     PREDICTIONS_FILE_PATH
 )
+from preprocess_utils import find_files
 
 def visualize(model_filepath, data_filepath):
     """Visualize results of clustering.
@@ -31,7 +33,6 @@ def visualize(model_filepath, data_filepath):
     model = load(model_filepath)
     data = np.load(data_filepath)
     X = data["X"]
-    # print(X.shape)
 
     plt.figure()
     plt.plot(model.labels_)
@@ -39,7 +40,62 @@ def visualize(model_filepath, data_filepath):
     plt.show()
     # print(model.cluster_centers_)
 
-    plot_clusters_2d(model, X)
+    # plot_clusters_2d(model, X)
+    plot_data_and_labels(X, model.labels_)
+
+
+def plot_data_and_labels(X, labels):
+
+    dataset = yaml.safe_load(open("params.yaml"))["profile"]["dataset"]
+    dir_path = str(DATA_PATH_RAW)
+
+    if dataset is not None:
+        dir_path += "/" + dataset
+
+    filepaths = find_files(dir_path, file_extension=".csv")
+
+    dfs = []
+
+    for filepath in filepaths:
+        df = pd.read_csv(filepath)
+        dfs.append(df)
+
+    df = pd.concat(dfs, ignore_index=True)
+
+    df = df.replace(16,0)
+    df = df.replace(40,1)
+    df = df.replace(41,2)
+    df = df.replace(128,3)
+
+    # pn = df["PN"].iloc[4400:]
+
+    print(len(labels))
+    print(len(pn))
+
+
+    # n = X.shape[0] * X.shape[1]
+    # print(X.shape)
+    # print(len(labels))
+
+    # l = []
+
+    # for i in range(len(labels)):
+    #     for j in range(X.shape[1]):
+    #         l.append(labels[i])
+
+    # print(len(l))
+    # X = X.flatten()
+
+    plt.figure()
+    # plt.xlim(0, n)
+    
+    # plt.plot(X)
+    plt.plot(labels, label="labels")
+    plt.plot(pn, label="PN")
+
+    plt.show()
+
+
 
 def plot_clusters_2d(model, X):
 
