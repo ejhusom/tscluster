@@ -123,7 +123,7 @@ stages:
         sequentialize.overlap: 0
         sequentialize.shuffle_samples: false
         sequentialize.window_size: 1
-        train.learning_method: kmeans
+        train.learning_method: hierarchical
     outs:
     - path: assets/data/sequentialized
       md5: e0b3fa02da8a0945419659bfd608695b.dir

@@ -59,8 +59,10 @@ def train(filepath):
         model = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw")
     elif learning_method == "kmeans":
         X = X.reshape(X.shape[0], X.shape[-1])
-        print(X.shape)
         model = cluster.KMeans(n_clusters=n_clusters, random_state=0, n_init=50, max_iter=500)
+    elif learning_method == "hierarchical":
+        X = X.reshape(X.shape[0], X.shape[-1])
+        model = cluster.AgglomerativeClustering(n_clusters=n_clusters, memory="cache")
     elif learning_method == "kernelkmeans":
         model = KernelKMeans(n_clusters=n_clusters)
     else:

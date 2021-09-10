@@ -51,7 +51,7 @@ sequentialize:
     shuffle_samples: False
 
 train:
-    learning_method: kmeans
+    learning_method: hierarchical
     # learning_method: timeserieskmeans
     n_clusters: 2
 
