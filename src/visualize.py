@@ -67,7 +67,11 @@ def plot_data_and_labels(X, labels):
     df = df.replace(41,2)
     df = df.replace(128,3)
 
-    # pn = df["PN"].iloc[4400:]
+    # Load parameters
+    with open("params.yaml", "r") as params_file:
+        params = yaml.safe_load(params_file)
+    rolling_window_size = params["featurize"]["rolling_window_size"]
+    pn = df["PN"].iloc[rolling_window_size:]
 
     print(len(labels))
     print(len(pn))

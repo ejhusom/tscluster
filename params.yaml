@@ -11,7 +11,7 @@ clean:
 featurize:
     features:
         # TN
-        - TN
+        # - TN
         # - PN
         # - Axis_X_Real_Position
         # - Axis_X_Target_Position
@@ -19,10 +19,12 @@ featurize:
         # - Axis_Y_Target_Position
         # - Axis_Z_Real_Position
         # - Axis_Z_Target_Position
+        - Spindle_Torque
     add_rolling_features: True
     rolling_window_size: 4400
     remove_features:
-        - TN
+        # - TN
+        - Spindle_Torque
         # - PN
         # - Axis_X_Real_Position
         # - Axis_X_Target_Position
