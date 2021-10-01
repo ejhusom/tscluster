@@ -18,6 +18,7 @@ import sys
 import numpy as np
 import pandas as pd
 import yaml
+from sklearn.decomposition import PCA
 
 from config import DATA_PATH, DATA_SEQUENTIALIZED_PATH, NON_DL_METHODS
 from preprocess_utils import (
@@ -38,6 +39,7 @@ def sequentialize(dir_path):
     params = yaml.safe_load(open("params.yaml"))["sequentialize"]
     learning_method = yaml.safe_load(open("params.yaml"))["train"]["learning_method"]
     overlap = params["overlap"]
+    pca = params["pca"]
 
     window_size = params["window_size"]
 
@@ -55,6 +57,10 @@ def sequentialize(dir_path):
         if params["shuffle_samples"]:
             permutation = np.random.permutation(X.shape[0])
             X = np.take(X, permutation, axis=0)
+
+        # if pca:
+            
+
 
         # Save X and y into a binary file
         np.savez(

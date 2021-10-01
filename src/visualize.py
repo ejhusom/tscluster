@@ -6,8 +6,13 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sn
 import yaml
 from joblib import load
+from sklearn.metrics import (
+    confusion_matrix,
+)
+# from scipy.cluster.hierarchy import dendrogram
 
 from config import (
     DATA_PATH,
@@ -30,19 +35,46 @@ def visualize(model_filepath, data_filepath):
 
     """
 
+    params = yaml.safe_load(open("params.yaml"))["train"]
+    learning_method = params["learning_method"]
+
     model = load(model_filepath)
     data = np.load(data_filepath)
     X = data["X"]
 
-    plt.figure()
-    plt.plot(model.labels_)
-    plt.savefig("test.png")
-    plt.show()
+    # plt.figure()
+    # plt.plot(model.labels_)
+    # plt.savefig("test.png")
+    # plt.show()
     # print(model.cluster_centers_)
 
+
     # plot_clusters_2d(model, X)
+
     plot_data_and_labels(X, model.labels_)
 
+    # if learning_method == "hierarchical":
+    #     plt.figure()
+    #     plot_dendrogram(model, truncate_mode='level', p=3)
+    #     plt.show()
+
+# def plot_dendrogram(model, **kwargs):
+    # # Create linkage matrix and then plot the dendrogram
+
+    # # create the counts of samples under each node
+    # counts = np.zeros(model.children_.shape[0])
+    # n_samples = len(model.labels_)
+    # for i, merge in enumerate(model.children_):
+    #     current_count = 0
+    #     for child_idx in merge:
+    #         if child_idx < n_samples:
+    #             current_count += 1
+    #         else:
+    #             current_count += counts[child_idx - n_samples]
+    #     counts[i] = current_count
+
+    # linkage_matrix = np.column_stack([model.children_, model.distances_, counts]).astype(float) 
+    # dendrogram(linkage_matrix, **kwargs)
 
 def plot_data_and_labels(X, labels):
 
@@ -71,11 +103,7 @@ def plot_data_and_labels(X, labels):
     with open("params.yaml", "r") as params_file:
         params = yaml.safe_load(params_file)
     rolling_window_size = params["featurize"]["rolling_window_size"]
-    pn = df["PN"].iloc[rolling_window_size:]
-
-    print(len(labels))
-    print(len(pn))
-
+    # pn = df["PN"].iloc[rolling_window_size:len(labels)+rolling_window_size]
 
     # n = X.shape[0] * X.shape[1]
     # print(X.shape)
@@ -95,9 +123,28 @@ def plot_data_and_labels(X, labels):
     
     # plt.plot(X)
     plt.plot(labels, label="labels")
-    plt.plot(pn, label="PN")
+    # plt.plot(pn, label="PN")
 
+    # plt.plot(df["TN"].iloc[rolling_window_size:len(labels)+rolling_window_size]/6000, label="TN", alpha=0.5)
+    plt.plot(np.array(df["TN"].iloc[rolling_window_size:len(labels)+rolling_window_size])/6000, label="TN", alpha=0.5)
+
+    plt.savefig("data_and_labels.png")
     plt.show()
+
+
+    # pn = pn - 1
+    # confusion = confusion_matrix(labels, pn, normalize="true")
+    # labels=indeces)
+
+    # print(confusion)
+
+    # df_confusion = pd.DataFrame(confusion)
+
+    # df_confusion.index.name = "True"
+    # df_confusion.columns.name = "Pred"
+    # plt.figure(figsize=(10, 7))
+    # sn.heatmap(df_confusion, cmap="Blues", annot=True, annot_kws={"size": 16})
+    # plt.savefig(PLOTS_PATH / "confusion_matrix.png")
 
 
 
@@ -119,11 +166,12 @@ def plot_clusters_2d(model, X):
         # ax = fig.add_subplot(projection="3d")
         colors = np.linspace(0, 10, n)
 
-        plt.plot(c[:,0], alpha=0.5)
         # plt.plot(c[:,0], c=colors, cmap=cmap, alpha=0.5)
 
         for j in range(b.shape[0]):
             plt.plot(b[j,:,0], c="black", alpha=0.05)
+
+        plt.plot(c[:,0], alpha=0.5)
 
         plt.savefig(PLOTS_PATH / f"tool_number_cluster_{i}.png")
         plt.show()

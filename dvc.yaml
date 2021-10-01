@@ -42,19 +42,6 @@ stages:
         - featurize.rolling_window_size
         - featurize.remove_features
 
-    # split:
-    #     cmd: python3 src/split.py assets/data/featurized/
-    #     deps:
-    #     - assets/data/featurized
-    #     - src/split.py
-    #     - src/config.py
-    #     outs:
-    #     - assets/data/split
-    #     params:
-    #     - split.train_split
-    #     - split.shuffle_files
-    #     - split.calibrate_split
-
     scale:
         cmd: python3 src/scale.py assets/data/featurized/
         deps:
