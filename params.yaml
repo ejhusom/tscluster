@@ -49,8 +49,8 @@ sequentialize:
 
 train:
     # learning_method: kmeans
-    # learning_method: timeserieskmeans
-    learning_method: hierarchical
+    learning_method: timeserieskmeans
+    # learning_method: hierarchical
     n_clusters: 2
 
 visualize:
